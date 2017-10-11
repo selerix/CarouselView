@@ -14,6 +14,25 @@ namespace Demo
 	{
 		public MainViewModel _vm;
 
+        private void MovePage(bool left)
+        {
+            var count = _vm.ItemsSource.Count;
+
+            if (count <= 1) return;
+
+            //var pos = _vm.Position;
+            var pos = myCarousel.Position;
+
+            if (left && pos == 0) return;
+
+            if (!left && pos == count - 1) return;
+
+            var oldIndex = pos;
+            var newIndex = oldIndex + (left ? - 1 : 1);
+
+            _vm.ItemsSource.Move(oldIndex, newIndex);
+        }
+
 		public MainPage ()
 		{
 			InitializeComponent ();
@@ -28,7 +47,15 @@ namespace Demo
 				_vm.ItemsSource.RemoveAt(myCarousel.Position);
 			});
 
-			ConfigureButtons();
+            MessagingCenter.Subscribe<MyFirstView>(this, "ShiftLeft", (sender) => {
+                MovePage(true);
+            });
+
+            MessagingCenter.Subscribe<MyFirstView>(this, "ShiftRight", (sender) => {
+                MovePage(false);
+            });
+
+            ConfigureButtons();
 
 			ToolbarItems.Add(new ToolbarItem
 			{

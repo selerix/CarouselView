@@ -97,7 +97,7 @@ namespace CarouselView.FormsPlugin.Android
             // If OldStartingIndex is not -1, then it contains the index where the old item was removed.
             if (e.Action == NotifyCollectionChangedAction.Remove)
             {
-                await RemovePage(e.OldStartingIndex);
+                await RemovePageAsync(e.OldStartingIndex);
             }
 
             // OldItems contains the moved item.
@@ -110,11 +110,32 @@ namespace CarouselView.FormsPlugin.Android
 
                 if (Element != null && viewPager != null && viewPager?.Adapter != null && Source != null)
                 {
-                    Source.RemoveAt(e.OldStartingIndex);
-                    Source.Insert(e.NewStartingIndex, e.OldItems[e.OldStartingIndex]);
-                    viewPager.Adapter?.NotifyDataSetChanged();
+                    /* 
+                    System.IndexOutOfRangeException: Index has to be between upper and lower bound of the array.
+                    I/MonoDroid(24479):   at System.Array.GetValue (System.Int32 index) [0x00037] in <896ad1d315ca4ba7b117efb8dacaedcf>:0 
+                    I/MonoDroid(24479):   at System.Array.System.Collections.IList.get_Item (System.Int32 index) [0x00000] in <896ad1d315ca4ba7b117efb8dacaedcf>:0 
+                    I/MonoDroid(24479):   at System.Collections.ArrayList+ReadOnlyList.get_Item (System.Int32 index) [0x00000] in <896ad1d315ca4ba7b117efb8dacaedcf>:0 
+                    I/MonoDroid(24479):   at CarouselView.FormsPlugin.Android.CarouselViewRenderer+<ItemsSource_CollectionChanged>d__6.MoveNext () [0x0018c] in .\CarouselView\CarouselView.FormsPlugin.Android\CarouselViewImplementation.cs:114 
+                    */
+                    //Source.RemoveAt(e.OldStartingIndex);
+                    //Source.Insert(e.NewStartingIndex, e.OldItems[e.OldStartingIndex]);
+                    //viewPager.Adapter?.NotifyDataSetChanged();
+                    //Element.SendPositionSelected();
 
-                    Element.SendPositionSelected();
+                    var maxIndex = Source.Count - 1;
+
+                    if (e.OldStartingIndex >= 0 && e.OldStartingIndex <= maxIndex
+                        && e.NewStartingIndex >= 0 && e.NewStartingIndex <= maxIndex)
+                    {
+                        var item = Source.ElementAtOrDefault(e.OldStartingIndex);
+                        if (item != null)
+                        {
+                            await RemovePageAsync(e.OldStartingIndex, false);
+                            InsertPage(item, e.NewStartingIndex);
+                            await SetCurrentPageAsync(e.NewStartingIndex);
+                            Element.SendPositionSelected();
+                        }
+                    }
                 }
             }
 
@@ -369,6 +390,8 @@ namespace CarouselView.FormsPlugin.Android
 
             if (Element != null && viewPager != null && viewPager?.Adapter != null && Source != null)
             {
+                isSwiping = true;
+
                 Source.Insert(position, item);
 
                 //var prevPos = Element.Position;
@@ -377,22 +400,23 @@ namespace CarouselView.FormsPlugin.Android
 
                 //if (position <= prevPos)
                     Element.SendPositionSelected();
+
+                isSwiping = false;
             }
         }
 
         // Android ViewPager is the most complicated piece of code ever :)
-        async Task RemovePage(int position)
+        async Task RemovePageAsync(int position, bool animate = true)
         {
 			// Fix for #168 Android NullReferenceException
 			var Source = ((PageAdapter)viewPager?.Adapter)?.Source;
 
             if (Element != null && viewPager != null && viewPager?.Adapter != null && Source != null && Source?.Count > 0)
             {
-
                 isSwiping = true;
 
                 // To remove current page
-                if (position == Element.Position)
+                if (position == Element.Position && animate)
                 {
                     var newPos = position - 1;
                     if (newPos == -1)
@@ -425,12 +449,30 @@ namespace CarouselView.FormsPlugin.Android
         {
             if (viewPager != null && Element.ItemsSource != null && Element.ItemsSource?.GetCount() > 0)
             {
-
                 viewPager.SetCurrentItem(position, Element.AnimateTransition);
 
                 // Invoke PositionSelected when AnimateTransition is disabled
                 if (!Element.AnimateTransition)
                     Element.SendPositionSelected();
+            }
+        }
+
+        async Task SetCurrentPageAsync(int position)
+        {
+            if (viewPager != null && Element.ItemsSource != null && Element.ItemsSource?.GetCount() > 0)
+            {
+                viewPager.SetCurrentItem(position, Element.AnimateTransition);
+                
+                if (Element.AnimateTransition)
+                {
+                    // With a swipe transition
+                    await Task.Delay(100);
+                }
+                else
+                {
+                    // Invoke PositionSelected when AnimateTransition is disabled
+                    Element.SendPositionSelected();
+                }
             }
         }
 

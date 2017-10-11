@@ -17,8 +17,18 @@ namespace Demo
 
 		void Handle_Clicked(object sender, System.EventArgs e)
 		{
-			MessagingCenter.Send<MyFirstView>(this, "RemoveMe");
+			MessagingCenter.Send(this, "RemoveMe");
 		}
-	}
+
+        private void shiftLeftButton_Clicked(object sender, EventArgs e)
+        {
+            MessagingCenter.Send(this, "ShiftLeft");
+        }
+
+        private void shiftRightButton_Clicked(object sender, EventArgs e)
+        {
+            MessagingCenter.Send(this, "ShiftRight");
+        }
+    }
 }
 

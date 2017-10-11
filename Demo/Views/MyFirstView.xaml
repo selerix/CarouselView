@@ -16,6 +16,8 @@
 	        <Label Text="Quod cum ita sit, paucae domus studiorum seriis cultibus antea celebratae nunc ludibriis ignaviae torpentis exundant, vocali sonu, perflabili tinnitu fidium resultantes. denique pro philosopho cantor et in locum oratoris doctor artium ludicrarum accitur et bybliothecis sepulcrorum ritu in perpetuum clausis organa fabricantur hydraulica, et lyrae ad speciem carpentorum ingentes tibiaeque et histrionici gestus instrumenta non levia." />
 			<ActivityIndicator IsRunning="true"/>
 			<Button x:Name="myButton" Text="{Binding ., Converter={StaticResource stringConverter}}" Clicked="Handle_Clicked"/>
+            <Button x:Name="shiftLeftButton" Text="ShiftLeft" Clicked="shiftLeftButton_Clicked"/>
+            <Button x:Name="shiftRightButton" Text="ShiftRight" Clicked="shiftRightButton_Clicked"/>
 			<DatePicker/>
 			<Editor BackgroundColor="Silver"/>
 			<Entry Keyboard="Numeric"/>
