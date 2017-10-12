@@ -118,34 +118,79 @@ namespace CarouselView.FormsPlugin.iOS
 				await RemovePage(e.OldStartingIndex);
 			}
 
-			// OldItems contains the moved item.
-			// OldStartingIndex contains the index where the item was moved from.
-			// NewStartingIndex contains the index where the item was moved to.
-			if (e.Action == NotifyCollectionChangedAction.Move)
-			{
-				if (Element != null && pageController != null && Source != null)
-				{
-					Source.RemoveAt(e.OldStartingIndex);
-					Source.Insert(e.NewStartingIndex, e.OldItems[e.OldStartingIndex]);
+            // OldItems contains the moved item.
+            // OldStartingIndex contains the index where the item was moved from.
+            // NewStartingIndex contains the index where the item was moved to.
+            if (e.Action == NotifyCollectionChangedAction.Move)
+            {
+                if (Element != null && pageController != null && Source != null)
+                {
+                    /*
+                    System.IndexOutOfRangeException: Index has to be between upper and lower bound of the array.
+                        at System.Array.GetValue (System.Int32 index) [0x0003d] in /Library/Frameworks/Xamarin.iOS.framework/Versions/11.2.0.11/src/mono/mcs/class/corlib/System/Array.cs:320 
+                        at System.Array.System.Collections.IList.get_Item (System.Int32 index) [0x00000] in /Library/Frameworks/Xamarin.iOS.framework/Versions/11.2.0.11/src/mono/mcs/class/corlib/corert/Array.Portable.cs:85 
+                        at System.Collections.ArrayList+ReadOnlyList.get_Item (System.Int32 index) [0x00000] in /Library/Frameworks/Xamarin.iOS.framework/Versions/11.2.0.11/src/mono/mcs/class/referencesource/mscorlib/system/collections/arraylist.cs:1872 
+                        at CarouselView.FormsPlugin.iOS.CarouselViewRenderer+<ItemsSource_CollectionChanged>d__11.MoveNext () [0x001dd] in <5b4dc7e424fe4b8190a7d93e83fe3825>:0
+                    */
 
-					var firstViewController = CreateViewController(e.NewStartingIndex);
+                    //Source.RemoveAt(e.OldStartingIndex);
+                    //Source.Insert(e.NewStartingIndex, e.OldItems[e.OldStartingIndex]);
 
-					pageController.SetViewControllers(new[] { firstViewController }, UIPageViewControllerNavigationDirection.Forward, false, s =>
-					{
-						isSwiping = true;
-						Element.Position = e.NewStartingIndex;
-						isSwiping = false;
-						SetIndicatorsCurrentPage();
+                    var maxIndex = Source.Count - 1;
 
-                        Element.SendPositionSelected();
-					});
-				}
-			}
+                    if (e.OldStartingIndex >= 0 && e.OldStartingIndex <= maxIndex
+                        && e.NewStartingIndex >= 0 && e.NewStartingIndex <= maxIndex)
+                    {
+                        var item = Source.ElementAtOrDefault(e.OldStartingIndex);
+                        if (item != null)
+                        {
+                            isSwiping = true;
 
-			// NewItems contains the replacement item.
-			// NewStartingIndex and OldStartingIndex are equal, and if they are not -1,
-			// then they contain the index where the item was replaced.
-			if (e.Action == NotifyCollectionChangedAction.Replace)
+                            Source.RemoveAt(e.OldStartingIndex);
+
+                            var oldDirection = e.NewStartingIndex < e.OldStartingIndex
+                               ? UIPageViewControllerNavigationDirection.Forward
+                               : UIPageViewControllerNavigationDirection.Reverse;
+                            //var oldDirection = UIPageViewControllerNavigationDirection.Reverse;
+                            var oldIndex = e.OldStartingIndex > e.NewStartingIndex ? e.NewStartingIndex : e.OldStartingIndex;
+                            var oldViewController = CreateViewController(oldIndex);
+
+                            pageController.SetViewControllers(new[] { oldViewController }, oldDirection, Element.AnimateTransition, so =>
+                            {   
+                                Element.Position = e.OldStartingIndex;
+
+                                Device.BeginInvokeOnMainThread(() =>
+                                {
+                                    Source.Insert(e.NewStartingIndex, item);
+
+                                    var newDirection = e.NewStartingIndex > e.OldStartingIndex
+                                        ? UIPageViewControllerNavigationDirection.Forward
+                                        : UIPageViewControllerNavigationDirection.Reverse;
+                                    //var newDirection = UIPageViewControllerNavigationDirection.Forward;
+                                    //var newIndex = e.OldStartingIndex < e.NewStartingIndex ? e.NewStartingIndex : e.OldStartingIndex;
+                                    var newViewController = CreateViewController(e.NewStartingIndex);
+
+                                    pageController.SetViewControllers(new[] { newViewController }, newDirection, Element.AnimateTransition, sn =>
+                                    {
+                                        Element.Position = e.NewStartingIndex;
+                                        isSwiping = false;
+
+                                        SetIndicatorsCurrentPage();
+
+                                        // Invoke PositionSelected as DidFinishAnimating is only called when touch to swipe
+                                        Element.SendPositionSelected();
+                                    });
+                                });
+                            });
+                        }
+                    }
+                }
+            }
+
+            // NewItems contains the replacement item.
+            // NewStartingIndex and OldStartingIndex are equal, and if they are not -1,
+            // then they contain the index where the item was replaced.
+            if (e.Action == NotifyCollectionChangedAction.Replace)
 			{
 				if (Element != null && pageController != null && Source != null)
 				{
