@@ -565,6 +565,10 @@ namespace CarouselView.FormsPlugin.Android
                 //view.SaveEnabled = true;
                 //view.SaveHierarchyState(mViewStates);
                 pager.RemoveView(view);
+
+                //view.RemoveAllViews();
+                //view.RemoveFromParent();
+                view.Dispose();
             }
 
             public override int GetItemPosition(Java.Lang.Object @object)

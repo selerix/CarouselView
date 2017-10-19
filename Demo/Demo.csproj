@@ -171,10 +171,7 @@
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Pages\" />
-    <Folder Include="ViewModels\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Reference Include="PropertyChanged">
       <HintPath>..\packages\PropertyChanged.Fody.2.1.1\lib\netstandard1.0\PropertyChanged.dll</HintPath>
@@ -205,6 +202,9 @@
     <None Include="packages.config" />
     <None Include="FodyWeavers.xml" />
     <None Include="App.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="carousel_view.JPG" />
   </ItemGroup>
   <Import Project="..\packages\Fody.2.1.0\build\portable-net+sl+win+wpa+wp\Fody.targets" Condition="Exists('..\packages\Fody.2.1.0\build\portable-net+sl+win+wpa+wp\Fody.targets')" />
   <Import Project="..\packages\Xamarin.Forms.2.4.0.282\build\portable-win+net45+wp80+win81+wpa81\Xamarin.Forms.targets" Condition="Exists('..\packages\Xamarin.Forms.2.4.0.282\build\portable-win+net45+wp80+win81+wpa81\Xamarin.Forms.targets')" />

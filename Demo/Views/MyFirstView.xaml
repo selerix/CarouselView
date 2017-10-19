@@ -18,7 +18,9 @@
 			<Button x:Name="myButton" Text="{Binding ., Converter={StaticResource stringConverter}}" Clicked="Handle_Clicked"/>
             <Button x:Name="shiftLeftButton" Text="ShiftLeft" Clicked="shiftLeftButton_Clicked"/>
             <Button x:Name="shiftRightButton" Text="ShiftRight" Clicked="shiftRightButton_Clicked"/>
-			<DatePicker/>
+            <!--<Image x:Name="resImage" Source="Resources/carousel_view.JPG"></Image>-->
+            <Image x:Name="streamImage" Source="{local:ImageResource Demo.carousel_view.JPG}"></Image>
+            <DatePicker/>
 			<Editor BackgroundColor="Silver"/>
 			<Entry Keyboard="Numeric"/>
 			<Picker/>
